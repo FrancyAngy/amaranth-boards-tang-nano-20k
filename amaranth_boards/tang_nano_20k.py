@@ -13,26 +13,27 @@ __all__ = ["TangNano20kPlatform"]
 class TangNano20kPlatform(GowinPlatform):
     part          = "GW2AR-LV18QN88C8/I7"
     family        = "GW2AR-18C"
-    default_clk   = "clk27"
+    default_clk   = "clk_osc"
     default_rst   = "reset"
+    flash_board   = False
     resources     = [
         Resource("clk27", 0, Pins("4", dir="i"),
                  Clock(27e6), Attrs(IO_TYPE="LVCMOS33")),
 
-        Resource("clk_osc", 0, Pins("OSCH", dir="i"),
-                 Clock(250e6)),
+        Resource("clk_osc", 0, Pins("10", dir="i"),
+                 Clock(133e6), Attrs(IO_TYPE="LVCMOS33")),
 
-        *ButtonResources(pins="88 87", invert=True,
+        *ButtonResources(pins="88 87", invert=False,
                          attrs=Attrs(IO_TYPE="LVCMOS33")),
 
-        Resource("reset", 0, Pins("87", dir="i", invert=True),
-                attrs=Attrs(IO_TYPE="LVCMOS33")),
+        Resource("reset", 0, Pins("87", dir="i", invert=False),
+                Attrs(IO_TYPE="LVCMOS33")),
 
         *LEDResources(pins="15 16 17 18 19 20", invert=True,
                       attrs=Attrs(IO_TYPE="LVCMOS33")),
 
         Resource("rgb_led", 0, Pins("79", dir="o"),
-                attrs=Attrs(IO_TYPE="LVCMOS33")),
+                Attrs(IO_TYPE="LVCMOS33")),
 
         UARTResource(0, rx="70", tx="69",
             attrs=Attrs(PULL_MODE="UP", IO_TYPE="LVCMOS33")),
@@ -77,15 +78,15 @@ class TangNano20kPlatform(GowinPlatform):
              Subsignal("cs", Pins("71", dir="o")),
              Subsignal("adq", Pins("72 73 74 75 70 69 68 67", dir="io")),
              Subsignal("rwds", Pins("77", dir="io")),
-             Attrs(IO_TYPE="LVCMOS33"), DRIVE=24),
+             Attrs(IO_TYPE="LVCMOS33")),
 
         Resource("audio", 0,
              Subsignal("l", Pins("j:2:17", dir="o")),
              Subsignal("r", Pins("j:2:18", dir="o")),
              Attrs(IO_TYPE="LVCMOS33")),
         
-        *AnalogResources(pins="j:1:13 j:1:14 j:1:15 j:1:16",
-                         attrs=Attrs(IO_TYPE="LVCMOS33")),
+        # *AnalogResources(pins="j:1:13 j:1:14 j:1:15 j:1:16",
+        #                  attrs=Attrs(IO_TYPE="LVCMOS33")),
 
         #NOTE: This JTAG Interface is Bit-Banged
         Resource("jtag_pins", 0,
@@ -113,9 +114,12 @@ class TangNano20kPlatform(GowinPlatform):
         return super().toolchain_prepare(fragment, name, **overrides, **kwargs)
 
     def toolchain_program(self, products, name):
-        with products.extract("{}.fs".format(name)) as bitstream_filename:
-            subprocess.check_call(["openFPGALoader", "-b", "tangnano20k", bitstream_filename])
-
+        if not self.flash_board:
+            with products.extract("{}.fs".format(name)) as bitstream_filename:
+                subprocess.check_call(["openFPGALoader", "-b", "tangnano20k", bitstream_filename])
+        else:
+            with products.extract("{}.fs".format(name)) as bitstream_filename:
+                subprocess.check_call(["openFPGALoader", "-b", "tangnano20k", bitstream_filename, "-f"])
 
 if __name__ == "__main__":
     from .test.blinky import *
