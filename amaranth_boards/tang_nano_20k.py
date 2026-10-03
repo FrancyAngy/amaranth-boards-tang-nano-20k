@@ -40,7 +40,7 @@ class TangNano20kPlatform(GowinPlatform):
 
         #NOTE: This interface is an extra Bit-Banged UART
         # on the J1 header
-        UARTResource(1, rx="j:1:19", tx="j:1:20",
+        UARTResource(1, rx="19", tx="20", conn=("j", 1),
             attrs=Attrs(IO_TYPE="LVCMOS33")),
 
         *SPIFlashResources(0,
@@ -81,19 +81,19 @@ class TangNano20kPlatform(GowinPlatform):
              Attrs(IO_TYPE="LVCMOS33")),
 
         Resource("audio", 0,
-             Subsignal("l", Pins("j:2:17", dir="o")),
-             Subsignal("r", Pins("j:2:18", dir="o")),
+             Subsignal("l", Pins("17", conn=("j", 2), dir="o")),
+             Subsignal("r", Pins("18", conn=("j", 2), dir="o")),
              Attrs(IO_TYPE="LVCMOS33")),
         
-        # *AnalogResources(pins="j:1:13 j:1:14 j:1:15 j:1:16",
+        # *AnalogResources(pins="j_1:13 j_1:14 j_1:15 j_1:16",
         #                  attrs=Attrs(IO_TYPE="LVCMOS33")),
 
         #NOTE: This JTAG Interface is Bit-Banged
         Resource("jtag_pins", 0,
-             Subsignal("tms", Pins("j:2:3", dir="i")),
-             Subsignal("tck", Pins("j:2:4", dir="i")),
-             Subsignal("tdi", Pins("j:2:5", dir="i")),
-             Subsignal("tdo", Pins("j:2:6", dir="o")),
+             Subsignal("tms", Pins("3", conn=("j", 2), dir="i")),
+             Subsignal("tck", Pins("4", conn=("j", 2), dir="i")),
+             Subsignal("tdi", Pins("5", conn=("j", 2), dir="i")),
+             Subsignal("tdo", Pins("6", conn=("j", 2), dir="o")),
              Attrs(IO_TYPE="LVCMOS33")),
 
     ]
